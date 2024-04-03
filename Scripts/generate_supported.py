@@ -8,10 +8,12 @@ basing on the models found in the lib and mod files
 import os, re, pickle
 
 
-root_path = os.path.join(os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..')))
-folder = os.path.join(root_path, 'Models')
-supported_txt_path = os.path.join(root_path, 'Supported.txt')
-supported_pickle_path = os.path.join(root_path, 'Supported.pickle')
+root_path = os.path.join(
+    os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)), ".."))
+)
+folder = os.path.join(root_path, "Models")
+supported_txt_path = os.path.join(root_path, "Supported.txt")
+supported_pickle_path = os.path.join(root_path, "Supported.pickle")
 
 supported = dict()
 
@@ -29,29 +31,37 @@ files_bjt = list()
 files_mos = list()
 files_other = list()
 
+
 def read_file(file):
-    with open(file, 'r', encoding="utf8", errors='ignore') as f:
+    with open(file, "r", encoding="utf8", errors="ignore") as f:
         return f.read().lower()
 
+
 # Function to extract models from spice file
-def extrac_models(path, content, extract, debug = False):
-    relativePath = path[str(path).index(folder)+len(folder):]
-    if (isinstance(extract, list)):
+def extrac_models(path, content, extract, debug=False):
+    relativePath = path[str(path).index(folder) + len(folder) :]
+    if isinstance(extract, list):
         extract = tuple(extract)
     for line in content.splitlines():
-        if (line.startswith(extract)):
+        if line.startswith(extract):
             try:
-                model = re.split('\s+', line)[1] # Split the line and get the model
+                model = re.split("\s+", line)[1]  # Split the line and get the model
             except IndexError:
                 continue
-            if model: # Get rid of empty string
-                if debug: print(model)
-                if not model in supported: # It is the first time we see this model
+            if model:  # Get rid of empty string
+                if debug:
+                    print(model)
+                if not model in supported:  # It is the first time we see this model
                     supported[model] = list()
-                    supported[model].append(relativePath) # Add to supported with the path to find it
-                else: # It is a duplicate...
-                    if not relativePath in supported[model]: # ...but from a different file
-                        supported[model].append(relativePath) # So we add it
+                    supported[model].append(
+                        relativePath
+                    )  # Add to supported with the path to find it
+                else:  # It is a duplicate...
+                    if (
+                        not relativePath in supported[model]
+                    ):  # ...but from a different file
+                        supported[model].append(relativePath)  # So we add it
+
 
 # Separate file by extension
 for root, dirs, files in os.walk(folder):
@@ -59,117 +69,117 @@ for root, dirs, files in os.walk(folder):
         f = os.path.join(root, name)
         extension = os.path.splitext(f)[1][1:].lower()
 
-        if (extension == 'txt'):
+        if extension == "txt":
             files_txt.append(f)
-        elif (extension == 'lib'):
+        elif extension == "lib":
             files_lib.append(f)
-        elif (extension == 'mod'):
+        elif extension == "mod":
             files_mod.append(f)
-        elif (extension == 'spi'):
+        elif extension == "spi":
             files_spi.append(f)
-        elif (extension == 'fam'):
+        elif extension == "fam":
             files_fam.append(f)
-        elif (extension == 'cir'):
+        elif extension == "cir":
             files_cir.append(f)
-        elif (extension == 'sub'):
+        elif extension == "sub":
             files_sub.append(f)
-        elif (extension == 'lb5'):
+        elif extension == "lb5":
             files_lb5.append(f)
-        elif (extension == 'dio'):
+        elif extension == "dio":
             files_dio.append(f)
-        elif (extension == 'bjt'):
+        elif extension == "bjt":
             files_bjt.append(f)
-        elif (extension == 'jft'):
+        elif extension == "jft":
             files_jft.append(f)
-        elif (extension == 'mos'):
+        elif extension == "mos":
             files_mos.append(f)
         else:
             files_other.append(f)
 
 # Lets see what we have
-print('{} txt found'.format(len(files_txt)))
-print('{} lib found'.format(len(files_lib)))
-print('{} mod found'.format(len(files_mod)))
-print('{} spi found'.format(len(files_spi)))
-print('{} fam found'.format(len(files_fam)))
-print('{} cir found'.format(len(files_cir)))
-print('{} sub found'.format(len(files_sub)))
-print('{} lb5 found'.format(len(files_lb5)))
-print('{} dio found'.format(len(files_dio)))
-print('{} bjt found'.format(len(files_bjt)))
-print('{} jft found'.format(len(files_jft)))
-print('{} mos found'.format(len(files_mos)))
-print('{} other kind found'.format(len(files_other)))
+print("{} txt found".format(len(files_txt)))
+print("{} lib found".format(len(files_lib)))
+print("{} mod found".format(len(files_mod)))
+print("{} spi found".format(len(files_spi)))
+print("{} fam found".format(len(files_fam)))
+print("{} cir found".format(len(files_cir)))
+print("{} sub found".format(len(files_sub)))
+print("{} lb5 found".format(len(files_lb5)))
+print("{} dio found".format(len(files_dio)))
+print("{} bjt found".format(len(files_bjt)))
+print("{} jft found".format(len(files_jft)))
+print("{} mos found".format(len(files_mos)))
+print("{} other kind found".format(len(files_other)))
 for f in files_other:
-    print('Not recognized: {}'.format(f))
+    print("Not recognized: {}".format(f))
 print()
 
 for file in files_lib:
     content = read_file(file)
     if content.startswith("eeschema-library version 2."):
         # Extract EESchema-LIBRARY Version 2.x
-        extrac_models(file, content, '# ')
+        extrac_models(file, content, "# ")
     else:
         # Extract subckt and model
-        extrac_models(file, content, ['.subckt', '.model']) 
+        extrac_models(file, content, [".subckt", ".model"])
 
 for file in files_mod:
     content = read_file(file)
     # Extract subckt and model
-    extrac_models(file, content, ['.subckt', '.model'])
+    extrac_models(file, content, [".subckt", ".model"])
 
 for file in files_fam:
     content = read_file(file)
     # Extract subckt
-    extrac_models(file, content, '.subckt')
+    extrac_models(file, content, ".subckt")
 
 for file in files_sub:
     content = read_file(file)
     # Extract subckt
-    extrac_models(file, content, '.subckt')
+    extrac_models(file, content, ".subckt")
 
 for file in files_lb5:
     content = read_file(file)
     # Extract subckt and model
-    extrac_models(file, content, ['.subckt', '.model'])
+    extrac_models(file, content, [".subckt", ".model"])
 
 for file in files_dio:
     content = read_file(file)
     # Extract model
-    extrac_models(file, content, '.model')
+    extrac_models(file, content, ".model")
 
 for file in files_bjt:
     content = read_file(file)
     # Extract model
-    extrac_models(file, content, '.model')
+    extrac_models(file, content, ".model")
 
 for file in files_jft:
     content = read_file(file)
     # Extract model
-    extrac_models(file, content, '.model')
+    extrac_models(file, content, ".model")
 
 for file in files_mos:
     content = read_file(file)
     # Extract model
-    extrac_models(file, content, '.model')
+    extrac_models(file, content, ".model")
 
-print('There are {} models'.format(len(supported)))
+print("There are {} models".format(len(supported)))
 
 # Write supported models and the path to find them to file
 # Pickle file useful to load it later https://docs.python.org/3/library/pickle.html
-with open(supported_pickle_path, 'wb') as file:
+with open(supported_pickle_path, "wb") as file:
     pickle.dump(supported, file, protocol=pickle.HIGHEST_PROTOCOL)
-    print('{} created'.format(supported_pickle_path))
+    print("{} created".format(supported_pickle_path))
 
 # Normal text file, good to be read by humans
-with open(supported_txt_path, 'w') as file:
-    '''
+with open(supported_txt_path, "w") as file:
+    """
     # Write part name with path
     for part, path in sorted(supported.items()):
         path = ' - '.join(p[p.index(folder_name)+len(folder_name):] for p in path)
         file.write('{}\t{}\n'.format(part, path))
-    '''
+    """
     # Write part name without path
     for part in sorted(supported.keys()):
-        file.write(part + '\n')
-    print('{} created'.format(supported_txt_path))
+        file.write(part + "\n")
+    print("{} created".format(supported_txt_path))
