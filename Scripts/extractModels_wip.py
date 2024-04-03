@@ -2,7 +2,7 @@
 import os
 import re
 import subprocess
-from os.path import dirname, abspath, join
+from os.path import abspath, dirname, join
 
 # Quick implementation to get models from library.
 # Tries to read from "spiceModels.lst" if no arguments are provided
@@ -19,15 +19,17 @@ comments_regex = r"(?<comments>(?:(?<=\n)\s*#[^\R*]\R))*"
 continued_no_paren_lines = r"(?:(?<=\n)\+[^\R*()]\R)*"
 model_paren_regex = r"(?:\.model\s+_NAME_\s+(?<type>\S+)\s*\([^)]*\))"
 model_line_regex = (
-    r"(?:\.model\s+_NAME_\s+(?<type>\S+)\s*[^()]*?\R" + continued_no_paren_lines + r")"
+    r"(?:\.model\s+_NAME_\s+(?<type>\S+)\s*[^()]*?\R"
+    + continued_no_paren_lines
+    + r")"
 )
 model_regex = f"(?<model>{model_paren_regex}|{model_line_regex})"
-all_regex = f"(?<matched>{comments_regex}[ \t]*(?:{model_regex})\s*?)"
+all_regex = f"(?<matched>{comments_regex}[ \t]*(?:{model_regex})\\s*?)"
 
 
 # Extract a "model" from a file
 def extract_from_file(name, file_path):
-    with open(file_path, "r") as file:
+    with open(file_path) as file:
         file_content = file.read()
 
     regex = all_regex.replace("_NAME_", re.escape(name))
@@ -56,7 +58,7 @@ if len(os.sys.argv) > 1:
     models = os.sys.argv[1:]
 elif os.path.isfile(DEFAULT_MODEL_LIST):
     # Get models from configuration file
-    with open(DEFAULT_MODEL_LIST, "r") as file:
+    with open(DEFAULT_MODEL_LIST) as file:
         models = file.read().splitlines()
 else:
     # Simple test

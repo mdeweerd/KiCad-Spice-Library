@@ -1,31 +1,32 @@
 #! /bin/env python
-# -*- coding: utf-8 -*-
 """
-This script check if a given part is between the supported modules
-and also from which file it cames
+This script checks if a given part is found in the supported modules
+and also from which file it came
 """
 
-import os, pickle, sys
+import os
+import pickle
+import sys
 
 root_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..")
 supported_pickle_path = os.path.join(root_path, "Supported.pickle")
 supported_txt_path = os.path.join(root_path, "Supported.txt")
-supported = dict()
+supported = {}
 
 
 # Print the models and the file in which it is located
 def print_match(part):
     try:
-        paths = ["- {0}".format(i) for i in supported[part]]
+        paths = [f"- {i}" for i in supported[part]]
         print(part + " found in")
         print(*paths, sep="\n")
     except Exception as e:
-        print("Error processing {}: ".format(part), e)
+        print(f"Error processing {part}: ", e)
 
 
 # Get similar models
 def get_similar(string):
-    similar = list()
+    similar = []
     for line in supported_str.splitlines():
         if line.find(string) != -1:
             similar.append(line)
@@ -36,10 +37,10 @@ def get_similar(string):
 
 # Search
 def search(module):
-    if not module in supported_str:
-        print("{} not found!".format(module))
+    if module not in supported_str:
+        print(f"{module} not found!")
 
-    elif module in supported_str and not module in supported:  # Typo?
+    elif module in supported_str and module not in supported:  # Typo?
         similar_part = ", ".join(get_similar(module))
         print(
             "{} not found, maybe you meant one of these: {}".format(
@@ -54,7 +55,7 @@ def search(module):
         count = supported_str.count(module)
 
         if count > 1:
-            print("\nAlso other {} similar part has been found:\n".format(count - 1))
+            print(f"\nAlso other {count - 1} similar part has been found:\n")
 
             similar_part = get_similar(module)
 
@@ -67,7 +68,7 @@ with open(supported_pickle_path, "rb") as file:
     supported = pickle.load(file)
 
 # Load the string of supported models
-with open(supported_txt_path, "r") as file:
+with open(supported_txt_path) as file:
     supported_str = file.read()
 
 if len(sys.argv) > 1:
@@ -77,7 +78,9 @@ if len(sys.argv) > 1:
 else:
     # Part to search
     print("Write 'exit' when you want to stop")
-    to_search = input("Write here the part you are looking for: ").strip().lower()
+    to_search = (
+        input("Write here the part you are looking for: ").strip().lower()
+    )
 
     while True:
         if to_search in ["exit", "no"]:
@@ -85,4 +88,6 @@ else:
             sys.exit(0)
         elif to_search:
             search(to_search)
-        to_search = input("Would you like to do another search? ").strip().lower()
+        to_search = (
+            input("Would you like to do another search? ").strip().lower()
+        )

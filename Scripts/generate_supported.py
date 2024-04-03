@@ -1,39 +1,41 @@
 #! /bin/env python
-# # -*- coding: utf-8 -*-
 """
-This script generate Supported.txt and Supported.pickle
-basing on the models found in the lib and mod files
+This script generates Supported.txt and Supported.pickle
+based on the models found in the lib and mod files
 """
 
-import os, re, pickle
-
+import os
+import pickle
+import re
 
 root_path = os.path.join(
-    os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)), ".."))
+    os.path.realpath(
+        os.path.join(os.path.dirname(os.path.realpath(__file__)), "..")
+    )
 )
 folder = os.path.join(root_path, "Models")
 supported_txt_path = os.path.join(root_path, "Supported.txt")
 supported_pickle_path = os.path.join(root_path, "Supported.pickle")
 
-supported = dict()
+supported = {}
 
-files_txt = list()
-files_lib = list()
-files_mod = list()
-files_spi = list()
-files_fam = list()
-files_cir = list()
-files_sub = list()
-files_lb5 = list()
-files_jft = list()
-files_dio = list()
-files_bjt = list()
-files_mos = list()
-files_other = list()
+files_txt = []
+files_lib = []
+files_mod = []
+files_spi = []
+files_fam = []
+files_cir = []
+files_sub = []
+files_lb5 = []
+files_jft = []
+files_dio = []
+files_bjt = []
+files_mos = []
+files_other = []
 
 
 def read_file(file):
-    with open(file, "r", encoding="utf8", errors="ignore") as f:
+    with open(file, encoding="utf8", errors="ignore") as f:
         return f.read().lower()
 
 
@@ -45,26 +47,30 @@ def extrac_models(path, content, extract, debug=False):
     for line in content.splitlines():
         if line.startswith(extract):
             try:
-                model = re.split("\s+", line)[1]  # Split the line and get the model
+                model = re.split(r"\s+", line)[
+                    1
+                ]  # Split the line and get the model
             except IndexError:
                 continue
             if model:  # Get rid of empty string
                 if debug:
                     print(model)
-                if not model in supported:  # It is the first time we see this model
-                    supported[model] = list()
+                if (
+                    model not in supported
+                ):  # It is the first time we see this model
+                    supported[model] = []
                     supported[model].append(
                         relativePath
                     )  # Add to supported with the path to find it
                 else:  # It is a duplicate...
                     if (
-                        not relativePath in supported[model]
+                        relativePath not in supported[model]
                     ):  # ...but from a different file
                         supported[model].append(relativePath)  # So we add it
 
 
 # Separate file by extension
-for root, dirs, files in os.walk(folder):
+for root, _dirs, files in os.walk(folder):
     for name in files:
         f = os.path.join(root, name)
         extension = os.path.splitext(f)[1][1:].lower()
@@ -97,21 +103,21 @@ for root, dirs, files in os.walk(folder):
             files_other.append(f)
 
 # Lets see what we have
-print("{} txt found".format(len(files_txt)))
-print("{} lib found".format(len(files_lib)))
-print("{} mod found".format(len(files_mod)))
-print("{} spi found".format(len(files_spi)))
-print("{} fam found".format(len(files_fam)))
-print("{} cir found".format(len(files_cir)))
-print("{} sub found".format(len(files_sub)))
-print("{} lb5 found".format(len(files_lb5)))
-print("{} dio found".format(len(files_dio)))
-print("{} bjt found".format(len(files_bjt)))
-print("{} jft found".format(len(files_jft)))
-print("{} mos found".format(len(files_mos)))
-print("{} other kind found".format(len(files_other)))
+print(f"{len(files_txt)} txt found")
+print(f"{len(files_lib)} lib found")
+print(f"{len(files_mod)} mod found")
+print(f"{len(files_spi)} spi found")
+print(f"{len(files_fam)} fam found")
+print(f"{len(files_cir)} cir found")
+print(f"{len(files_sub)} sub found")
+print(f"{len(files_lb5)} lb5 found")
+print(f"{len(files_dio)} dio found")
+print(f"{len(files_bjt)} bjt found")
+print(f"{len(files_jft)} jft found")
+print(f"{len(files_mos)} mos found")
+print(f"{len(files_other)} other kind found")
 for f in files_other:
-    print("Not recognized: {}".format(f))
+    print(f"Not recognized: {f}")
 print()
 
 for file in files_lib:
@@ -163,23 +169,26 @@ for file in files_mos:
     # Extract model
     extrac_models(file, content, ".model")
 
-print("There are {} models".format(len(supported)))
+print(f"There are {len(supported)} models")
 
 # Write supported models and the path to find them to file
-# Pickle file useful to load it later https://docs.python.org/3/library/pickle.html
+# Pickle file useful to load it later
+#  https://docs.python.org/3/library/pickle.html
 with open(supported_pickle_path, "wb") as file:
     pickle.dump(supported, file, protocol=pickle.HIGHEST_PROTOCOL)
-    print("{} created".format(supported_pickle_path))
+    print(f"{supported_pickle_path} created")
 
 # Normal text file, good to be read by humans
 with open(supported_txt_path, "w") as file:
     """
     # Write part name with path
     for part, path in sorted(supported.items()):
-        path = ' - '.join(p[p.index(folder_name)+len(folder_name):] for p in path)
-        file.write('{}\t{}\n'.format(part, path))
+        path = " - ".join(
+            p[p.index(folder_name) + len(folder_name) :] for p in path
+        )
+        file.write(f"{part}\t{path}\n")
     """
     # Write part name without path
     for part in sorted(supported.keys()):
         file.write(part + "\n")
-    print("{} created".format(supported_txt_path))
+    print(f"{supported_txt_path} created")

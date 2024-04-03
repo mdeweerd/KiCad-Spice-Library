@@ -1,7 +1,7 @@
 # `extractModels.pl`
 
-Perl script that extracts the models listed in `spiceModels.lst`
-or the provided filename.
+Perl script that extracts the models listed in `spiceModels.lst` or the
+provided filename.
 
 # `extractModels_wip[12].pl`
 

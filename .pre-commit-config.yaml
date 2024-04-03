@@ -4,7 +4,7 @@ files: >
   ^(.*\.(py|pl|pm|json|md|sh|yaml|cfg|txt)
    |(.*/)?[^.]*
    )$
-exclude: (\.bak|(\.cache)/.*)$
+exclude: ^(Models/.*|Supported\.(pickle|txt)|.*(\.bak|(\.cache)/.*))$
 repos:
   - repo: meta
     hooks:
@@ -114,14 +114,14 @@ repos:
       - id: python-bandit-vulnerability-check
         args:
           - --skip
-          - B101,B105,B311,B324,B404,B602,B603,B605,B607,B108
+          - B403,B301,B113,B403,B404
           - --recursive
           - .
   - repo: https://github.com/PyCQA/flake8
     rev: 6.1.0
     hooks:
       - id: flake8
-        args: [--ignore, "F821,W503"]
+        args: [--ignore, "F821,W503,E203"]
         additional_dependencies:
           - flake8-bugbear
           - flake8-comprehensions
@@ -141,7 +141,7 @@ repos:
         exclude: >
           (?x)
           ^(models/.*)$
-        args: ["--ignore-words-list=weerd", --skip="./.*", --quiet-level=2]
+        args: ["--ignore-words-list=sie", --skip="./.*", --quiet-level=2]
   - repo: https://github.com/pre-commit/mirrors-mypy
     rev: v1.7.1
     hooks:
